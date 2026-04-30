@@ -430,6 +430,8 @@ body {
 .resource-icon.timber { background: rgba(76, 175, 80, 0.15); color: #66bb6a; }
 .resource-icon.stone { background: rgba(158, 158, 158, 0.15); color: #bdbdbd; }
 .resource-icon.grain { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+.resource-icon.clay { background: rgba(198, 120, 62, 0.15); color: #c6783e; }
+.resource-icon.iron { background: rgba(144, 164, 184, 0.15); color: #90a4b8; }
 .resource-info { flex: 1; }
 .resource-name {
   font-size: 1rem;
@@ -615,7 +617,7 @@ body {
           <div class="resource-icon stone">&#9670;</div>
           <div class="resource-info">
             <div class="resource-name">Stone</div>
-            <div class="resource-desc">Quarry rock for stone blocks and masonry</div>
+            <div class="resource-desc">Quarry rock for cut stone and fine masonry</div>
           </div>
           <div class="resource-check"></div>
         </div>
@@ -624,6 +626,22 @@ body {
           <div class="resource-info">
             <div class="resource-name">Grain</div>
             <div class="resource-desc">Farm fields for grain and flour production</div>
+          </div>
+          <div class="resource-check"></div>
+        </div>
+        <div class="resource-option" data-resource="clay">
+          <div class="resource-icon clay">&#9724;</div>
+          <div class="resource-info">
+            <div class="resource-name">Clay</div>
+            <div class="resource-desc">Dig clay for bricks and pottery crafting</div>
+          </div>
+          <div class="resource-check"></div>
+        </div>
+        <div class="resource-option" data-resource="iron_ore">
+          <div class="resource-icon iron">&#9878;</div>
+          <div class="resource-info">
+            <div class="resource-name">Iron</div>
+            <div class="resource-desc">Mine iron ore for bars, tools, and armaments</div>
           </div>
           <div class="resource-check"></div>
         </div>
@@ -815,7 +833,7 @@ body {
   function checkProfileAndRoute(user) {
     currentUser = user;
     sb.from('player_profiles')
-      .select('id, display_name, specialization_key, home_world_id')
+      .select('id, display_name, specialization_key, home_world_id, home_district_id')
       .eq('id', user.id)
       .maybeSingle()
       .then(function (result) {
@@ -865,6 +883,16 @@ body {
 
     // Update status cards with real data
     updateDashboardData(user);
+
+    // Load building/resource catalog for build validation
+    if (!CatalogHelper.isLoaded()) {
+      CatalogHelper.load(sb).then(function () {
+        console.log('Catalog loaded:', Object.keys(CatalogHelper.getBuildingsForTier(1)).length, 'tier-1 buildings');
+      }).catch(function (err) {
+        console.warn('Catalog load failed (non-fatal):', err);
+      });
+    }
+
     showScreen('screen-dashboard');
   }
 
@@ -897,6 +925,20 @@ body {
           document.getElementById('dash-population').textContent = result.data.total_population;
         }
       });
+
+    // Fetch district tier (if player has a district)
+    if (playerProfile && playerProfile.home_district_id) {
+      sb.from('districts')
+        .select('id, tier, name')
+        .eq('id', playerProfile.home_district_id)
+        .maybeSingle()
+        .then(function (result) {
+          if (result.data) {
+            playerProfile._district = result.data;
+            document.getElementById('dash-district').textContent = 'Tier ' + result.data.tier;
+          }
+        });
+    }
 
     // Update progress checklist
     updateProgressChecklist();
@@ -1051,12 +1093,21 @@ body {
         id: currentUser.id,
         display_name: data.display_name || displayName,
         specialization_key: data.specialization || specialization,
-        home_world_id: data.world_id || null
+        home_world_id: data.world_id || null,
+        home_district_id: data.district_id || null,
+        district_tier: data.district_tier || 1
       };
     }).catch(function () {
       return clientSideFallback(displayName, specialization);
     });
   }
+
+  // All 15 v1 goods — must match resource_types catalog
+  var V1_GOODS = [
+    'timber', 'stone', 'grain', 'clay', 'iron_ore',
+    'wood_planks', 'cut_stone', 'bricks', 'iron_bars',
+    'flour', 'bread', 'tools', 'pottery', 'furniture', 'fine_goods'
+  ];
 
   function clientSideFallback(displayName, specialization) {
     var userId = currentUser.id;
@@ -1083,7 +1134,11 @@ body {
           .then(function (profileResult) {
             if (profileResult.error) throw profileResult.error;
 
-            // Step 3: Create treasury + inventory + population (parallel)
+            // Step 3: Create treasury + inventory (all 15 goods) + population (parallel)
+            var inventoryRows = V1_GOODS.map(function (key) {
+              return { player_id: userId, resource_key: key, amount: 0 };
+            });
+
             return Promise.all([
               sb.from('player_treasuries').upsert({
                 player_id: userId,
@@ -1091,11 +1146,10 @@ body {
                 income_per_tick: 0,
                 expenses_per_tick: 0
               }, { onConflict: 'player_id' }),
-              sb.from('player_inventories').upsert([
-                { player_id: userId, resource_key: 'timber', amount: 0 },
-                { player_id: userId, resource_key: 'stone', amount: 0 },
-                { player_id: userId, resource_key: 'grain', amount: 0 }
-              ], { onConflict: 'player_id,resource_key' }),
+              sb.from('player_inventories').upsert(
+                inventoryRows,
+                { onConflict: 'player_id,resource_key' }
+              ),
               sb.from('population_state').upsert({
                 player_id: userId,
                 total_population: 0,
@@ -1113,15 +1167,171 @@ body {
                 console.warn('Bootstrap sub-insert error:', results[i].error.message);
               }
             }
+            // NOTE: Client-side fallback does not auto-create a district.
+            // District creation requires server-side RPC for slot allocation.
             return {
               id: userId,
               display_name: displayName,
               specialization_key: specialization,
-              home_world_id: worldId
+              home_world_id: worldId,
+              home_district_id: null,
+              district_tier: null
             };
           });
       });
   }
+
+  // ── Catalog helper: build validation layer ─────────
+  // Provides reusable logic for checking building unlock status,
+  // costs, and placement rules against the v1 building_types catalog.
+  //
+  // Usage:
+  //   CatalogHelper.load(sb)            — fetch catalog from Supabase
+  //   CatalogHelper.isBuildingUnlocked(key, districtTier)
+  //   CatalogHelper.getBuildCosts(key)
+  //   CatalogHelper.canAffordBuilding(key, gold, inventory)
+  //   CatalogHelper.getPlacementRules(key)
+  //   CatalogHelper.getBuildingsForTier(districtTier)
+  //   CatalogHelper.getSpecializationChain(specKey)
+  //
+  // NOTE: Catalog data is read-only reference data fetched once per
+  // session. Server-side RPC remains authoritative for actual placement.
+
+  var CatalogHelper = (function () {
+    var _buildingTypes = {};   // key → building_type row
+    var _resourceTypes = {};   // key → resource_type row
+    var _loaded = false;
+
+    function load(supabaseClient) {
+      return Promise.all([
+        supabaseClient.from('building_types').select('*').eq('is_active', true),
+        supabaseClient.from('resource_types').select('*').eq('is_active', true)
+      ]).then(function (results) {
+        if (results[0].data) {
+          results[0].data.forEach(function (bt) { _buildingTypes[bt.key] = bt; });
+        }
+        if (results[1].data) {
+          results[1].data.forEach(function (rt) { _resourceTypes[rt.key] = rt; });
+        }
+        _loaded = true;
+        return { buildings: _buildingTypes, resources: _resourceTypes };
+      });
+    }
+
+    // Is this building available at the given district tier?
+    function isBuildingUnlocked(buildingKey, districtTier) {
+      var bt = _buildingTypes[buildingKey];
+      if (!bt) return false;
+      var rules = bt.build_rules || {};
+      var requiredTier = rules.districtTierRequired || 1;
+      return districtTier >= requiredTier;
+    }
+
+    // Get the resource + gold costs for placing this building
+    function getBuildCosts(buildingKey) {
+      var bt = _buildingTypes[buildingKey];
+      if (!bt) return null;
+      var rules = bt.build_rules || {};
+      // buildCosts includes gold and resource costs in one object
+      return rules.buildCosts || { gold: bt.cost_gold };
+    }
+
+    // Can the player afford this building given their gold and inventory?
+    // inventory: { resource_key: amount, ... }
+    function canAffordBuilding(buildingKey, gold, inventory) {
+      var costs = getBuildCosts(buildingKey);
+      if (!costs) return { affordable: false, reason: 'Unknown building' };
+      var missing = [];
+      if (costs.gold && gold < costs.gold) {
+        missing.push('Need ' + costs.gold + ' gold (have ' + gold + ')');
+      }
+      Object.keys(costs).forEach(function (key) {
+        if (key === 'gold') return;
+        var have = (inventory && inventory[key]) || 0;
+        if (have < costs[key]) {
+          missing.push('Need ' + costs[key] + ' ' + key + ' (have ' + have + ')');
+        }
+      });
+      return {
+        affordable: missing.length === 0,
+        missing: missing
+      };
+    }
+
+    // Get placement rules for a building
+    function getPlacementRules(buildingKey) {
+      var bt = _buildingTypes[buildingKey];
+      if (!bt) return null;
+      var rules = bt.build_rules || {};
+      return {
+        footprint: [bt.footprint_w, bt.footprint_h],
+        mustMatchResource: !!rules.mustMatchResource,
+        requiresRoadAccess: !!rules.requiresRoadAccess,
+        specialization: rules.specialization || null,
+        requiredResourceKey: bt.required_resource_key || null
+      };
+    }
+
+    // Get all buildings unlocked at a given district tier
+    function getBuildingsForTier(districtTier) {
+      var result = [];
+      Object.keys(_buildingTypes).forEach(function (key) {
+        if (isBuildingUnlocked(key, districtTier)) {
+          result.push(_buildingTypes[key]);
+        }
+      });
+      return result;
+    }
+
+    // Get the production chain for a specialization
+    // Returns { extraction, refining, production } building keys
+    function getSpecializationChain(specKey) {
+      // Map specialization key to the iron_ore variant if needed
+      // Maps specialization_key (= resource_types.key) to the
+      // catalog's build_rules.specialization value
+      var specMap = {
+        timber: 'timber', stone: 'stone', grain: 'grain',
+        clay: 'clay', iron_ore: 'iron'
+      };
+      var spec = specMap[specKey];
+      if (!spec) return null;
+      var chain = { extraction: [], refining: [], production: [] };
+      Object.keys(_buildingTypes).forEach(function (key) {
+        var bt = _buildingTypes[key];
+        var rules = bt.build_rules || {};
+        if (rules.specialization !== spec) return;
+        if (bt.category === 'extraction') chain.extraction.push(bt);
+        else if (bt.category === 'refining') chain.refining.push(bt);
+        else if (bt.category === 'production') chain.production.push(bt);
+      });
+      return chain;
+    }
+
+    // Get a single building type by key
+    function get(buildingKey) {
+      return _buildingTypes[buildingKey] || null;
+    }
+
+    // Get a resource type by key
+    function getResource(resourceKey) {
+      return _resourceTypes[resourceKey] || null;
+    }
+
+    function isLoaded() { return _loaded; }
+
+    return {
+      load: load,
+      isLoaded: isLoaded,
+      get: get,
+      getResource: getResource,
+      isBuildingUnlocked: isBuildingUnlocked,
+      getBuildCosts: getBuildCosts,
+      canAffordBuilding: canAffordBuilding,
+      getPlacementRules: getPlacementRules,
+      getBuildingsForTier: getBuildingsForTier,
+      getSpecializationChain: getSpecializationChain
+    };
+  })();
 
   // ── Init: restore session ──────────────────────────
   sb.auth.getSession().then(function (result) {

@@ -199,22 +199,73 @@ Systems to emphasize:
 - growth constraints
 
 ### 2. Specialization
-Players should not all do everything equally well from the start.
+Players should have **strong identity without unequal core power**.
+
+The guiding principle is:
+**symmetric mechanics, asymmetric flavor.**
+
+That means:
+- every player follows the same advancement structure
+- every player has the same rough power ceiling
+- every player gets equivalent progression roles by tier
+- what changes is the resource theme, building names, visuals, and produced goods flavor
+
+Players are choosing an identity, not a stronger class.
+
+The important refinement is that the game should use a **shared global goods economy**.
+A player's specialization is their **primary production identity**, not their entire economic universe.
+
+In practice:
+- Timber, Stone, Grain, or future resources should map onto the same advancement template
+- each specialization should have a comparable raw tier, refined tier, advanced tier, and prestige/export tier
+- the world should contain a broader pool of goods than any one player can efficiently produce alone
+- balance should live in the shared template, not in hidden resource favoritism
 
 Possible forms:
-- chosen starting industry/resource
+- chosen primary specialization/resource
 - district bonuses
-- research unlock bias
-- trade advantages
+- research unlock bias kept within tight balance bounds
+- trade positioning without making one specialization objectively superior
 
 ### 3. Economy and trade
 Multiplayer meaning comes from exchange.
 
 Core ideas:
+- one shared global goods pool
 - player-to-player trade
 - NPC demand or trade partners
 - resource chains feeding higher-value goods
 - reasons to cooperate instead of playing as isolated single-player islands
+- advancement that sometimes requires imported goods, not just self-production
+
+The economy should be built on a **large shared goods catalog**.
+Players specialize in producing a subset of goods efficiently, but buildings, upgrades, and development should draw from a much broader pool.
+Goods can come from three channels:
+- self-production
+- player trade
+- external-city imports
+
+Trade should exist in two layers:
+
+#### Player-to-player trade
+Players should be able to trade with teammates or neighbors to get resources and goods they need for development.
+This is the main expression of multiplayer interdependence.
+
+Examples:
+- I produce Timber and need Stone or Flour to continue developing
+- another player produces Stone and needs Wood Planks from me
+- we trade because neither of us should be fully self-sufficient at every step
+
+#### External city trade
+The world should also include non-player trade partners or outside cities.
+This should work more like Pharaoh-style trade:
+- outside cities buy and sell certain categories of goods
+- trade routes, limits, demand, and availability matter
+- they provide a sink/source beyond player-only exchange
+- they help keep the economy alive even when not many players are online
+
+Player trade creates the social economy.
+External trade creates the world economy.
 
 ### 4. Persistent progression
 Players should feel that their city and role matter over time.
@@ -246,13 +297,16 @@ Prove the core loop:
 - mobile-friendly UI
 - persistence of buildings/resources/progress
 - simple trade model
+- a reduced v1 goods pool that proves the larger economic concept without overwhelming the game
+- a concrete dependency graph where construction, food, utility, and prestige goods cross specialization lines
+- a first building set that covers infrastructure, housing, extraction, refining, production, trade, and district progression
 
 ### V1 features to delay
 - deep disasters/hazards
 - large social systems
 - combat
 - advanced prestige politics
-- too many resources/building branches
+- a huge live goods catalog at full intended scale
 - overly complex realtime simulation
 
 ---

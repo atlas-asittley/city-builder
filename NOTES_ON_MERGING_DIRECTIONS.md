@@ -51,9 +51,10 @@ That is the actual synthesis.
 - housing or population cap pressure
 - simple service/infrastructure logic
 - district ownership
-- specialization choice
+- specialization choice built on a shared advancement template
 - trade offers / shared economy
 - persistent progression
+- external-city trade in a Pharaoh-like style once the basics work
 
 ---
 
@@ -94,4 +95,8 @@ When we sit down to discuss the merge more deeply, the key question should be:
 
 **Which Pharaoh mechanics create the most interesting multiplayer consequences?**
 
-That question will save us from cargo-cult design.
+A close second is:
+
+**Which goods or city systems should require trade so that specialization actually matters?**
+
+Those two questions together will save us from cargo-cult design.
