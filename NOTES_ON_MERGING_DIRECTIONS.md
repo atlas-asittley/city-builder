@@ -10,6 +10,7 @@
 - layered city-management feel
 - physical map presence and placement strategy
 - infrastructure pressure and maintenance
+- visible neighborhood growth and houses evolving on the map
 
 ### 2. Multiplayer city-builder strengths
 - persistent accounts and progression
@@ -37,7 +38,7 @@ In other words:
 ---
 
 ## Clean merged vision
-A player manages a district/city presence with roads, housing, services, workers, production chains, and desirability-like pressures — but does so inside a larger persistent multiplayer world where specialization and trade matter.
+A player manages a district/city presence with roads, housing, services, workers, production chains, and desirability-like pressures — and can actually see that district grow visually on the map as houses and neighborhoods evolve — but does so inside a larger persistent multiplayer world where specialization and trade matter.
 
 That is the actual synthesis.
 
@@ -84,6 +85,7 @@ Better merge:
 ## Likely product shape
 The game should feel like:
 - a living city sim when you are managing your district
+- a visible place with readable roads, blocks, and evolving houses
 - a multiplayer economy/world when you zoom out and think strategically
 
 That tension is good. It gives both intimacy and scale.

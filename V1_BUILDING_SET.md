@@ -51,6 +51,9 @@ These make the district function physically.
 ## 2. Housing
 Housing creates population pressure and a reason to care about non-production goods.
 
+It also needs to be **visually legible and satisfying**.
+Players should not just see a housing number go up. They should see homes and neighborhoods change on the map as conditions improve.
+
 ### Housing I
 **Role:** basic worker shelter
 - Category: housing
@@ -64,6 +67,7 @@ Housing creates population pressure and a reason to care about non-production go
 - Inputs to upgrade/build: Wood Planks, Bricks
 - Supports: more residents, better district quality
 - Notes: first meaningful development step for population
+- Visual expectation: homes should visibly upgrade from basic dwellings into more established neighborhood structures
 
 ### Upper Housing / Housing III
 **Role:** higher-quality housing
@@ -71,6 +75,7 @@ Housing creates population pressure and a reason to care about non-production go
 - Inputs: Furniture, Pottery, Bread
 - Supports: higher population quality / prestige / desirability-style pressure
 - Notes: this is where non-construction goods start to matter visibly
+- Visual expectation: this tier should feel noticeably more prosperous on the map, not just numerically better
 
 ---
 
@@ -327,7 +332,10 @@ If trade is central, it should exist physically on the map.
 ### 4. Housing should consume the results of the economy
 Otherwise citizens are just a number with no bite.
 
-### 5. District progression buildings should create medium-term goals
+### 5. Housing should visibly evolve on the map
+If homes do not visually change, we lose a big part of the emotional payoff.
+
+### 6. District progression buildings should create medium-term goals
 Otherwise the game becomes infinite raw throughput with no shape.
 
 ---

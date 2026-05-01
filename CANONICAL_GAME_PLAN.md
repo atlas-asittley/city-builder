@@ -33,6 +33,8 @@ These are the mechanics worth keeping because they are strong, not because we wa
 - Treasury / maintenance / taxes / expenses
 - Hazards / upkeep / infrastructure stress
 - Layered city management instead of a simple idle game
+- A real visual map where the city is physically laid out and readable
+- The satisfaction of watching neighborhoods and houses evolve over time
 
 ---
 
@@ -190,6 +192,15 @@ Get account creation and persistence working first.
 ### 1. City simulation
 A city should feel like a system, not just a canvas.
 
+It also needs to feel like a **place**.
+The visual map is not optional dressing — it is part of the core appeal.
+Players should be able to look at their district and see:
+- roads
+- housing blocks
+- workshops and industry
+- storage and trade infrastructure
+- visible neighborhood change over time
+
 Systems to emphasize:
 - housing
 - jobs/workers
@@ -197,6 +208,8 @@ Systems to emphasize:
 - service coverage
 - upkeep costs
 - growth constraints
+- visual district layout and map readability
+- housing evolution that can be seen on the map, not just inferred from stats
 
 ### 2. Specialization
 Players should have **strong identity without unequal core power**.
@@ -300,6 +313,7 @@ Prove the core loop:
 - a reduced v1 goods pool that proves the larger economic concept without overwhelming the game
 - a concrete dependency graph where construction, food, utility, and prestige goods cross specialization lines
 - a first building set that covers infrastructure, housing, extraction, refining, production, trade, and district progression
+- a visibly laid-out district map that already starts to feel like a city instead of a spreadsheet
 
 ### V1 features to delay
 - deep disasters/hazards
@@ -460,4 +474,4 @@ For now, use generic internal naming like:
 ## Final Direction Statement
 This project is now defined as:
 
-**A mobile-first multiplayer city builder with persistent progression, Supabase-backed accounts and data, and city-management systems inspired by Pharaoh but developed into an original online game.**
+**A mobile-first multiplayer city builder with a real visual city map, evolving housing, persistent progression, Supabase-backed accounts and data, and city-management systems inspired by Pharaoh but developed into an original online game.**
